@@ -1,2 +1,2 @@
 # mandel
-Another mandelbrot fractal generator in Go
+Mandelbrot Fractal Generator library in Go
