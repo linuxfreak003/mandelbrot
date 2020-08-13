@@ -11,7 +11,8 @@ import (
 
 func TestWrite(t *testing.T) {
 	G := NewGomegaWithT(t)
-	m := mandel.NewGenerator(800, 800, 0.0, 0.0, 1.0)
+	x, y := mandel.FindInterestingPoint(2.0, 2.0)
+	m := mandel.NewGenerator(800, 800, x, y, 200.0)
 	m.SetLimit(256)
 	m.Generate()
 	w := &bytes.Buffer{}

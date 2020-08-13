@@ -28,6 +28,13 @@ func CalcPoint(x, y float64, limit int) int {
 	return i
 }
 
+func Average(colors ...color.RGBA) color.RGBA {
+	if len(colors) == 0 {
+		return color.RGBA{}
+	}
+	return color.RGBA{}
+}
+
 func Gradient(start, end color.RGBA, percentage float64) color.RGBA {
 	sR, sG, sB, _ := start.RGBA()
 	eR, eG, eB, _ := end.RGBA()

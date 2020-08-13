@@ -33,11 +33,12 @@ func DefaultColorize(iter int) color.RGBA {
 		uint8(iter % 255),
 		0xff,
 	}
-	// percentage := float64(iter) / float64(g.Limit)
-	// return Gradient(g.ColorStart, g.ColorEnd, percentage)
 }
 
 func NewGenerator(width, height int, x, y, zoom float64) *Generator {
+	if zoom < 1 {
+		zoom = 1
+	}
 	return &Generator{
 		Width:      width,
 		Height:     height,
@@ -61,17 +62,22 @@ func (g *Generator) SetLimit(limit int)       { g.Limit = limit }
 func (g *Generator) SetColorize(cf ColorFunc) { g.Colorize = cf }
 
 func (g *Generator) Generate() error {
-	wInc := 4.0 / float64(g.Width)
-	hInc := 4.0 / float64(g.Height)
-	for x := 0; x < g.Width; x++ {
-		for y := 0; y < g.Height; y++ {
-			a := (float64(x) * wInc) - 2.0
-			b := (float64(y) * hInc) - 2.0
+	inc := 4.0 / (float64(g.Height) * g.Zoom)
+	x0 := g.X - inc*float64(g.Width/2)
+	y0 := g.Y - inc*float64(g.Height/2)
+	for x, a := 0, x0; x < g.Width; x, a = x+1, a+inc {
+		for y, b := 0, y0; y < g.Height; y, b = y+1, b+inc {
 			col := g.GetColor(a, b)
 			g.Image.Set(x, y, col)
 		}
 	}
 	return nil
+}
+
+func (g *Generator) AntiAlias(level int, x, y, inc float64) color.RGBA {
+	// Get points in middle of pixel
+	// Return Average of those points
+	return Average()
 }
 
 func (g *Generator) GetColor(x, y float64) color.RGBA {
