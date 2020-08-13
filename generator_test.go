@@ -10,31 +10,42 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func MyColorFunc(iters int) color.RGBA {
-	black := color.RGBA{255, 255, 255, 0xff}
-	c1 := color.RGBA{0, 100, 255, 0xff}
+func TestAverage(t *testing.T) {
+	G := NewGomegaWithT(t)
 
-	if iters == -1 {
-		return color.RGBA{0, 0, 0, 0xff}
+	colors := []color.RGBA{
+		color.RGBA{0, 0, 0, 0xff},
+		color.RGBA{255, 255, 255, 0xff},
+		color.RGBA{255, 255, 255, 0xff},
+		color.RGBA{255, 255, 255, 0xff},
 	}
 
-	if iters < 300 {
-		return mandel.Gradient(c1, black, 300, iters)
-	}
-
-	if iters < 600 {
-		return mandel.Gradient(black, color.RGBA{255, 0, 0, 0xff}, 300, iters-300)
-	}
-
-	return mandel.Gradient(color.RGBA{255, 0, 0, 0xff}, color.RGBA{255, 255, 0, 0xff}, 400, iters-600)
+	c := mandel.Average(colors...)
+	G.Expect(c).To(Equal(color.RGBA{191, 191, 191, 0xff}))
 }
 
 func TestWrite(t *testing.T) {
 	G := NewGomegaWithT(t)
+
+	MyColorFunc := func(iters int) color.RGBA {
+		black := color.RGBA{255, 255, 255, 0xff}
+		c1 := color.RGBA{0, 100, 255, 0xff}
+
+		switch {
+		case iters == -1:
+			return color.RGBA{0, 0, 0, 0xff}
+		case iters < 300:
+			return mandel.Gradient(c1, black, 300, iters)
+		case iters < 600:
+			return mandel.Gradient(black, color.RGBA{255, 0, 0, 0xff}, 300, iters-300)
+		}
+
+		return mandel.Gradient(color.RGBA{255, 0, 0, 0xff}, color.RGBA{255, 255, 0, 0xff}, 400, iters-600)
+	}
 	x, y := mandel.FindInterestingPoint(0, 0)
-	m := mandel.NewGenerator(800, 600, x, y).
+	m := mandel.NewGenerator(1024, 768, x, y).
 		WithZoom(900).
-		WithAntiAlias(1).
+		WithAntiAlias(2).
 		WithColorizeFunc(MyColorFunc).
 		WithLimit(1000)
 

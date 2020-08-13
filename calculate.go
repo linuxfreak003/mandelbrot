@@ -27,6 +27,7 @@ func CalcPoint(x, y float64, limit int) int {
 		}
 		i++
 	}
+
 	return i
 }
 
@@ -34,17 +35,21 @@ func Average(colors ...color.RGBA) color.RGBA {
 	if len(colors) == 0 {
 		return color.RGBA{}
 	}
-	var r, g, b uint8
+
+	var r, g, b int
+
 	for _, c := range colors {
-		r += c.R
-		g += c.G
-		b += c.B
+		r += int(c.R)
+		g += int(c.G)
+		b += int(c.B)
 	}
-	l := uint8(len(colors))
+
+	l := len(colors)
+
 	return color.RGBA{
-		r / l,
-		g / l,
-		b / l,
+		uint8(r / l),
+		uint8(g / l),
+		uint8(b / l),
 		0xff,
 	}
 }
