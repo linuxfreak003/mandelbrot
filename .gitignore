@@ -16,3 +16,4 @@
 # vendor/
 go.sum
 *.png
+mandel-go
