@@ -3,12 +3,14 @@ package mandel
 import (
 	"image/color"
 	"math/rand"
+	"time"
 )
 
 func FindInterestingPoint(x, y float64) (float64, float64) {
+	rand.Seed(time.Now().UnixNano())
 	for {
 		i := CalcPoint(x, y, 1000)
-		if i > 900 {
+		if i > 990 {
 			return x, y
 		}
 		x = (rand.Float64() * 4) - 2
@@ -32,16 +34,27 @@ func Average(colors ...color.RGBA) color.RGBA {
 	if len(colors) == 0 {
 		return color.RGBA{}
 	}
-	return color.RGBA{}
+	var r, g, b uint8
+	for _, c := range colors {
+		r += c.R
+		g += c.G
+		b += c.B
+	}
+	l := uint8(len(colors))
+	return color.RGBA{
+		r / l,
+		g / l,
+		b / l,
+		0xff,
+	}
 }
 
-func Gradient(start, end color.RGBA, percentage float64) color.RGBA {
-	sR, sG, sB, _ := start.RGBA()
-	eR, eG, eB, _ := end.RGBA()
+func Gradient(start, end color.RGBA, max, steps int) color.RGBA {
+	fi := float64(steps)
 	return color.RGBA{
-		R: uint8((float64(eR-sR) * percentage) + float64(sR)),
-		G: uint8((float64(eG-sG) * percentage) + float64(sG)),
-		B: uint8((float64(eB-sB) * percentage) + float64(sB)),
-		A: 0xff,
+		uint8(fi*(float64(end.R-start.R)/float64(max-1))) + start.R,
+		uint8(fi*(float64(end.G-start.G)/float64(max-1))) + start.G,
+		uint8(fi*(float64(end.B-start.B)/float64(max-1))) + start.B,
+		0xff,
 	}
 }
