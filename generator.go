@@ -81,14 +81,28 @@ func (g *Generator) SetLimit(limit int)       { g.Limit = limit }
 func (g *Generator) SetColorize(cf ColorFunc) { g.Colorize = cf }
 
 func (g *Generator) Generate() {
+	type pixel struct {
+		X, Y  int
+		Color color.RGBA
+	}
+
+	ch := make(chan pixel, 0)
+
 	inc := 4.0 / (float64(g.Height) * g.Zoom)
 	x0 := g.X - inc*float64(g.Width/2)
 	y0 := g.Y - inc*float64(g.Height/2)
 	for x, a := 0, x0; x < g.Width; x, a = x+1, a+inc {
 		for y, b := 0, y0; y < g.Height; y, b = y+1, b+inc {
-			col := g.AntiAliasedColor(a, b, inc)
-			g.Image.Set(x, y, col)
+			go func(a, b, inc float64, x, y int) {
+				col := g.AntiAliasedColor(a, b, inc)
+				ch <- pixel{x, y, col}
+			}(a, b, inc, x, y)
 		}
+	}
+
+	for c := 0; c < g.Width*g.Height; c++ {
+		p := <-ch
+		g.Image.Set(p.X, p.Y, p.Color)
 	}
 	return
 }
