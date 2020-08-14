@@ -1,5 +1,5 @@
-# mandel
-[![Documentation](https://godoc.org/github.com/linuxfreak003/mandel?status.svg)](http://godoc.org/github.com/linuxfreak003/mandel)
+# mandelbrot
+[![Documentation](https://godoc.org/github.com/linuxfreak003/mandelbrot?status.svg)](http://godoc.org/github.com/linuxfreak003/mandelbrot)
 
 Mandelbrot Fractal Generator library in Go with accompanying CLI
 
@@ -14,7 +14,7 @@ import (
   "os"
   "image/color"
 
-  "github.com/linuxfreak003/mandel"
+  "github.com/linuxfreak003/mandelbrot"
 )
 
 // Simple example color scheme function
@@ -24,16 +24,16 @@ func ColorMe(i int) color.RGBA {
   if i == -1 {
     return black
   }
-  return mandel.Gradient(black, white, 1000, i)
+  return mandelbrot.Gradient(black, white, 1000, i)
 }
 
 func main() {
   // Finds an interesting point to use
-  x, y := mandel.FindInterestingPoint(0,0)
+  x, y := mandelbrot.FindInterestingPoint(0,0)
 
   // Get a new generator, use ColorMe for
   // the colorscheme
-  g := mandel.NewGenerator(1024, 768, x, y).
+  g := mandelbrot.NewGenerator(1024, 768, x, y).
     WithColorizeFunc(ColorMe)
 
   // Generate the image
@@ -59,7 +59,7 @@ Refer to the docs for more options like zoom, antialiasing, etc.
 ### Installation
 
 ```bash
-go get -u github.com/linuxfreak003/mandel/mandel-go
+go get -u github.com/linuxfreak003/mandelbrot/mandel-go
 ```
 
 ### Usage
