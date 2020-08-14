@@ -8,21 +8,13 @@ import (
 	"io"
 )
 
+// ColorFucn is what is used to generate the colorscheme
+// It takes the number of iterations from the mandelbrot
+// calculation and returns a color DefaultColorize is an
+// extremely basic example
 type ColorFunc func(int) color.RGBA
 
-type Generator struct {
-	Width     int
-	Height    int
-	X         float64
-	Y         float64
-	Zoom      float64
-	Limit     int
-	AntiAlias int
-	Image     *image.RGBA
-	Colorize  ColorFunc
-}
-
-// Simple Greyscale colorscheme
+// DefaultColorze is a very simple Greyscale ColorFunc
 func DefaultColorize(iter int) color.RGBA {
 	if iter == -1 {
 		return color.RGBA{0, 0, 0, 0xff}
@@ -36,6 +28,33 @@ func DefaultColorize(iter int) color.RGBA {
 	}
 }
 
+// Generator is the used to generate the fractal
+type Generator struct {
+	// Width and Height specify the resolution to use
+	Width  int
+	Height int
+	// X and Y specify what point on the fractal to center on
+	X float64
+	Y float64
+	// Zoom specifies how much to zoom in
+	Zoom float64
+	// Limit specifies when the mandelbrot calculation
+	// should bail out and return -1 instead of
+	// the number of iterations
+	Limit int
+	// AntiAlias specifies what level of antialiasing to use
+	// An AntiAlias of 2 will average 4 points for each pixel
+	// 3 will average 9 points. The increase is exponential
+	AntiAlias int
+	// Colorize is the ColorFunc used to generate the colorscheme
+	Colorize ColorFunc
+	//img is the underlying image
+	img *image.RGBA
+}
+
+// NewGenerator creates a new *Generator
+// it should be used to ensure all fields
+// are filled.
 func NewGenerator(width, height int, x, y float64) *Generator {
 	return &Generator{
 		Width:     width,
@@ -45,11 +64,12 @@ func NewGenerator(width, height int, x, y float64) *Generator {
 		Zoom:      1,
 		Limit:     1000,
 		AntiAlias: 1,
-		Image:     image.NewRGBA(image.Rect(0, 0, width, height)),
 		Colorize:  DefaultColorize,
+		img:       image.NewRGBA(image.Rect(0, 0, width, height)),
 	}
 }
 
+// Sets the AntiAliasing level
 func (g *Generator) WithAntiAlias(aa int) *Generator {
 	if aa < 1 {
 		aa = 1
@@ -57,6 +77,8 @@ func (g *Generator) WithAntiAlias(aa int) *Generator {
 	g.AntiAlias = aa
 	return g
 }
+
+// Sets the zoom level
 func (g *Generator) WithZoom(z float64) *Generator {
 	if z < 1 {
 		z = 1
@@ -64,11 +86,18 @@ func (g *Generator) WithZoom(z float64) *Generator {
 	g.Zoom = z
 	return g
 }
+
+// Sets the bailout limit for fractal
 func (g *Generator) WithLimit(l int) *Generator {
 	g.Limit = l
 	return g
 }
+
+// Sets the Colorize function used to generate colorscheme
 func (g *Generator) WithColorizeFunc(f ColorFunc) *Generator {
+	if f == nil {
+		return g
+	}
 	g.Colorize = f
 	return g
 }
@@ -81,6 +110,8 @@ func (g *Generator) SetZoom(zoom float64)     { g.Zoom = zoom }
 func (g *Generator) SetLimit(limit int)       { g.Limit = limit }
 func (g *Generator) SetColorize(cf ColorFunc) { g.Colorize = cf }
 
+// Generate does the mandelbrot calculation
+// and stores the fractal into an image
 func (g *Generator) Generate() {
 	type pixel struct {
 		X, Y  int
@@ -103,11 +134,14 @@ func (g *Generator) Generate() {
 
 	for c := 0; c < g.Width*g.Height; c++ {
 		p := <-ch
-		g.Image.Set(p.X, p.Y, p.Color)
+		g.img.Set(p.X, p.Y, p.Color)
 	}
 	return
 }
 
+// AntiAliasedColor breaks a pixel down into parts
+// and gets the color for each point, then averages
+// them out for the pixel color
 func (g *Generator) AntiAliasedColor(x, y, inc float64) color.RGBA {
 	colors := []color.RGBA{}
 	smallInc := inc / float64(g.AntiAlias)
@@ -119,14 +153,21 @@ func (g *Generator) AntiAliasedColor(x, y, inc float64) color.RGBA {
 	return Average(colors...)
 }
 
+// GetColor gets the mandelbrot calculation iterations
+// and Uses the defined Colorize function turn into a color
 func (g *Generator) GetColor(x, y float64) color.RGBA {
-	iter := CalcPoint(x, y, g.Limit)
+	iter := Calculate(x, y, g.Limit)
 	return g.Colorize(iter)
 }
 
+// WritePNG writes the underlying image to a an io.Writer
+// as a PNG
 func (g *Generator) WritePNG(w io.Writer) error {
-	return png.Encode(w, g.Image)
+	return png.Encode(w, g.img)
 }
+
+// WriteJPG writes the underlying image to a an io.Writer
+// as a JPG
 func (g *Generator) WriteJPG(w io.Writer) error {
-	return jpeg.Encode(w, g.Image, nil)
+	return jpeg.Encode(w, g.img, nil)
 }
