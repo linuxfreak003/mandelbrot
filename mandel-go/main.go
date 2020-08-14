@@ -121,7 +121,7 @@ func main() {
 	}
 
 	if random {
-		x, y = mandel.FindInterestingPoint(0, 0)
+		x, y = mandel.FindInterestingPoint(0, 0, limit)
 	}
 
 	F := FuncMap[colorfunc]

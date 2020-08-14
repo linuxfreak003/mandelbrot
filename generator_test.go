@@ -42,7 +42,7 @@ func TestWrite(t *testing.T) {
 
 		return mandelbrot.Gradient(color.RGBA{255, 0, 0, 0xff}, color.RGBA{255, 255, 0, 0xff}, 400, iters-600)
 	}
-	x, y := mandelbrot.FindInterestingPoint(0, 0)
+	x, y := mandelbrot.FindInterestingPoint(0, 0, 1000)
 	m := mandelbrot.NewGenerator(1024, 768, x, y).
 		WithZoom(900).
 		WithAntiAlias(2).

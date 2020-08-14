@@ -9,11 +9,11 @@ import (
 // FindInterestingPoint is a helper function
 // that picks a bunch of random points on the fractal
 // until it find one that is interesting
-func FindInterestingPoint(x, y float64) (float64, float64) {
+func FindInterestingPoint(x, y float64, limit int) (float64, float64) {
 	rand.Seed(time.Now().UnixNano())
 	for {
-		i := Calculate(x, y, 1000)
-		if i > 990 {
+		i := Calculate(x, y, limit)
+		if i > int(float64(limit)*0.95) {
 			return x, y
 		}
 		x = (rand.Float64() * 4) - 2
