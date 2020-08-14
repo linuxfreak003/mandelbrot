@@ -1,4 +1,4 @@
-# mandel
+# mandel [![Godoc][GodocV2SVG]][GodocV2URL]
 
 Mandelbrot Fractal Generator library in Go with accompanying CLI
 
