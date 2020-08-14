@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"testing"
 
-	"github.com/linuxfreak003/mandel"
+	"github.com/linuxfreak003/mandelbrot"
 	. "github.com/onsi/gomega"
 )
 
@@ -20,7 +20,7 @@ func TestAverage(t *testing.T) {
 		color.RGBA{255, 255, 255, 0xff},
 	}
 
-	c := mandel.Average(colors...)
+	c := mandelbrot.Average(colors...)
 	G.Expect(c).To(Equal(color.RGBA{191, 191, 191, 0xff}))
 }
 
@@ -35,15 +35,15 @@ func TestWrite(t *testing.T) {
 		case iters == -1:
 			return color.RGBA{0, 0, 0, 0xff}
 		case iters < 300:
-			return mandel.Gradient(c1, black, 300, iters)
+			return mandelbrot.Gradient(c1, black, 300, iters)
 		case iters < 600:
-			return mandel.Gradient(black, color.RGBA{255, 0, 0, 0xff}, 300, iters-300)
+			return mandelbrot.Gradient(black, color.RGBA{255, 0, 0, 0xff}, 300, iters-300)
 		}
 
-		return mandel.Gradient(color.RGBA{255, 0, 0, 0xff}, color.RGBA{255, 255, 0, 0xff}, 400, iters-600)
+		return mandelbrot.Gradient(color.RGBA{255, 0, 0, 0xff}, color.RGBA{255, 255, 0, 0xff}, 400, iters-600)
 	}
-	x, y := mandel.FindInterestingPoint(0, 0)
-	m := mandel.NewGenerator(1024, 768, x, y).
+	x, y := mandelbrot.FindInterestingPoint(0, 0)
+	m := mandelbrot.NewGenerator(1024, 768, x, y).
 		WithZoom(900).
 		WithAntiAlias(2).
 		WithColorizeFunc(MyColorFunc).
