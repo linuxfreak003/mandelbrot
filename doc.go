@@ -10,6 +10,6 @@
 // // Writes the image as a png to "test.png"
 // f, _ := os.Create("test.png")
 // g.WritePNG(f)
-package mandel
+package mandelbrot
 
 const VERSION = "v1.0"

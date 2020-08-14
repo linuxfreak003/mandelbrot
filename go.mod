@@ -1,4 +1,4 @@
-module github.com/linuxfreak003/mandel
+module github.com/linuxfreak003/mandelbrot
 
 go 1.14
 

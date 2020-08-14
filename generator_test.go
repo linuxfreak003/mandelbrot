@@ -1,4 +1,4 @@
-package mandel_test
+package mandelbrot_test
 
 import (
 	"bytes"
@@ -51,7 +51,7 @@ func TestWrite(t *testing.T) {
 
 	m.Generate()
 	w := &bytes.Buffer{}
-	err := m.Write(w)
+	err := m.WritePNG(w)
 	G.Expect(err).To(BeNil())
 	err = ioutil.WriteFile("test.png", w.Bytes(), 0644)
 	G.Expect(err).To(BeNil())

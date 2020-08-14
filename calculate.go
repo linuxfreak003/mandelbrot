@@ -1,4 +1,4 @@
-package mandel
+package mandelbrot
 
 import (
 	"image/color"
