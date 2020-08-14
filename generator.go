@@ -124,12 +124,12 @@ func (g *Generator) Generate() {
 	x0 := g.X - inc*float64(g.Width/2)
 	y0 := g.Y - inc*float64(g.Height/2)
 	for x, a := 0, x0; x < g.Width; x, a = x+1, a+inc {
-		for y, b := 0, y0; y < g.Height; y, b = y+1, b+inc {
-			go func(a, b, inc float64, x, y int) {
+		go func(a, inc float64, x int) {
+			for y, b := 0, y0; y < g.Height; y, b = y+1, b+inc {
 				col := g.AntiAliasedColor(a, b, inc)
 				ch <- pixel{x, y, col}
-			}(a, b, inc, x, y)
-		}
+			}
+		}(a, inc, x)
 	}
 
 	for c := 0; c < g.Width*g.Height; c++ {
