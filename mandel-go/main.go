@@ -125,6 +125,10 @@ func main() {
 	}
 
 	F := FuncMap[colorfunc]
+	if F == nil {
+		log.Fatalf("No Color function found by name: %s", colorfunc)
+		return
+	}
 
 	m := mandel.NewGenerator(width, height, x, y).
 		WithZoom(zoom).
@@ -145,17 +149,7 @@ func main() {
 	}
 	defer f.Close()
 
-	j, err := os.Create("test.jpg")
-	if err != nil {
-		panic(err)
-	}
-	defer j.Close()
-
 	err = m.WritePNG(f)
-	if err != nil {
-		panic(err)
-	}
-	err = m.WriteJPG(j)
 	if err != nil {
 		panic(err)
 	}
