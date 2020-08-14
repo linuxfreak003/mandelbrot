@@ -8,7 +8,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/linuxfreak003/mandel"
+	mandel "github.com/linuxfreak003/mandelbrot"
 )
 
 func MyColorFunc(iters int) color.RGBA {
