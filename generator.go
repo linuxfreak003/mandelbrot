@@ -3,6 +3,7 @@ package mandel
 import (
 	"image"
 	"image/color"
+	"image/jpeg"
 	"image/png"
 	"io"
 )
@@ -123,6 +124,9 @@ func (g *Generator) GetColor(x, y float64) color.RGBA {
 	return g.Colorize(iter)
 }
 
-func (g *Generator) Write(w io.Writer) error {
+func (g *Generator) WritePNG(w io.Writer) error {
 	return png.Encode(w, g.Image)
+}
+func (g *Generator) WriteJPG(w io.Writer) error {
+	return jpeg.Encode(w, g.Image, nil)
 }

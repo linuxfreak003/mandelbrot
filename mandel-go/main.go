@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"image/color"
 	"log"
 	"os"
@@ -12,18 +13,37 @@ import (
 
 func MyColorFunc(iters int) color.RGBA {
 	black := color.RGBA{255, 255, 255, 0xff}
-	c1 := color.RGBA{0, 100, 255, 0xff}
+	blue := color.RGBA{0, 100, 255, 0xff}
+	red := color.RGBA{255, 0, 0, 0xff}
+	teal := color.RGBA{255, 255, 0, 0xff}
 
 	switch {
 	case iters == -1:
 		return color.RGBA{0, 0, 0, 0xff}
 	case iters < 300:
-		return mandel.Gradient(c1, black, 300, iters)
+		return mandel.Gradient(blue, black, 300, iters)
 	case iters < 600:
-		return mandel.Gradient(black, c1, 300, iters-300)
+		return mandel.Gradient(black, red, 300, iters-300)
 	}
 
-	return mandel.Gradient(c1, color.RGBA{255, 255, 0, 0xff}, 400, iters-600)
+	return mandel.Gradient(red, teal, 400, iters-600)
+}
+
+func Christmas(x int) color.RGBA {
+	white := color.RGBA{255, 255, 255, 0xff}
+	red := color.RGBA{255, 0, 0, 0xff}
+	green := color.RGBA{0, 255, 0, 0xff}
+	blue := color.RGBA{0, 0, 255, 0xff}
+	switch {
+	case x < 100:
+		return mandel.Gradient(white, red, 100, x)
+	case x < 300:
+		return mandel.Gradient(white, green, 200, x-100)
+	case x < 600:
+		return mandel.Gradient(white, blue, 300, x-300)
+	default:
+		return mandel.Gradient(blue, white, 400, x-600)
+	}
 }
 
 func CustomColorFunc(iters int) color.RGBA {
@@ -70,13 +90,14 @@ var FuncMap = map[string]func(int) color.RGBA{
 	"GradientGrayscale": GradientGrayscale,
 	"CustomColorFunc":   CustomColorFunc,
 	"MyColorFunc":       MyColorFunc,
+	"Christmas":         Christmas,
 }
 
 func main() {
 	var colorfunc, filename string
 	var zoom, x, y float64
 	var aa, width, height, limit int
-	var random, julia bool
+	var random, julia, help bool
 
 	flag.StringVar(&colorfunc, "colorfunc", "SimpleGrayscale", "`Color Function`")
 	flag.StringVar(&filename, "o", "test.png", "Output Filename")
@@ -89,8 +110,15 @@ func main() {
 	flag.IntVar(&limit, "limit", 1000, "Fractal Calculation limit")
 	flag.BoolVar(&random, "r", false, "Use random interesting point (will override x/y)")
 	flag.BoolVar(&julia, "j", false, "Julia Set")
+	flag.BoolVar(&help, "h", false, "Show usage help")
 
 	flag.Parse()
+
+	if help {
+		fmt.Fprintf(os.Stdout, "Usage of %s:\n", os.Args[0])
+		flag.PrintDefaults()
+		return
+	}
 
 	if random {
 		x, y = mandel.FindInterestingPoint(0, 0)
@@ -117,7 +145,17 @@ func main() {
 	}
 	defer f.Close()
 
-	err = m.Write(f)
+	j, err := os.Create("test.jpg")
+	if err != nil {
+		panic(err)
+	}
+	defer j.Close()
+
+	err = m.WritePNG(f)
+	if err != nil {
+		panic(err)
+	}
+	err = m.WriteJPG(j)
 	if err != nil {
 		panic(err)
 	}
