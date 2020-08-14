@@ -1,4 +1,5 @@
-# mandel [![Godoc][GodocV2SVG]][GodocV2URL]
+# mandel
+[![Documentation](https://godoc.org/github.com/linuxfreak003/mandel?status.svg)](http://godoc.org/github.com/linuxfreak003/mandel)
 
 Mandelbrot Fractal Generator library in Go with accompanying CLI
 
