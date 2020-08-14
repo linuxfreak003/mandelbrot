@@ -139,9 +139,14 @@ func main() {
 	log.Printf("Generating fractal...")
 	t := time.Now()
 	m.Generate()
-	log.Printf("Parameters\nX: %f Y: %f\n"+
+	log.Printf("Parameters\n"+
+		"Resolution %d x %d\n"+
+		"X: %f Y: %f\n"+
 		"Zoom: %f\nLimit: %d\nAntiAlias: %d\n"+
-		"Took: %v", m.X, m.Y, m.Zoom, m.Limit, m.AntiAlias, time.Now().Sub(t))
+		"Took: %v",
+		m.Width, m.Height, m.X, m.Y, m.Zoom,
+		m.Limit, m.AntiAlias, time.Now().Sub(t),
+	)
 
 	f, err := os.Create(filename)
 	if err != nil {
