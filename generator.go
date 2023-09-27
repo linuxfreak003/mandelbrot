@@ -1,11 +1,16 @@
 package mandelbrot
 
 import (
+	"bytes"
+	"fmt"
 	"image"
 	"image/color"
 	"image/jpeg"
 	"image/png"
 	"io"
+	"math"
+
+	"github.com/icza/mjpeg"
 )
 
 // ColorFucn is what is used to generate the colorscheme
@@ -50,6 +55,14 @@ type Generator struct {
 	Colorize ColorFunc
 	//img is the underlying image
 	img *image.RGBA
+	// StartX specifies the starting x if generating video
+	StartX float64
+	// StartY specifies the starting y if generating video
+	StartY float64
+	// StartZoom specifies the starting zoom if generating video
+	StartZoom float64
+	// Frames specifies the number of frames to use if generating video
+	Frames int
 }
 
 // NewGenerator creates a new *Generator
@@ -66,6 +79,8 @@ func NewGenerator(width, height int, x, y float64) *Generator {
 		AntiAlias: 1,
 		Colorize:  DefaultColorize,
 		img:       image.NewRGBA(image.Rect(0, 0, width, height)),
+		Frames:    300,
+		StartZoom: 1,
 	}
 }
 
@@ -158,6 +173,65 @@ func (g *Generator) AntiAliasedColor(x, y, inc float64) color.RGBA {
 func (g *Generator) GetColor(x, y float64) color.RGBA {
 	iter := Calculate(x, y, g.Limit)
 	return g.Colorize(iter)
+}
+
+// WriteVideo generates a video file
+func (g *Generator) WriteVideo(file string) error {
+	aw, err := mjpeg.New(file, int32(g.Width), int32(g.Height), 60)
+	if err != nil {
+		return err
+	}
+	defer aw.Close()
+
+	sqrtFunc := func(i int, start float64, end float64) float64 {
+		x := float64(i) / float64(g.Frames)
+		mult := 2 * math.Sqrt(x)
+		if mult > 1 {
+			mult = 1
+		}
+		distance := end - start
+		return start + mult*distance
+	}
+
+	endX := g.X
+	xFunc := func(i int) float64 {
+		return sqrtFunc(i, g.StartX, endX)
+	}
+
+	endY := g.Y
+	yFunc := func(i int) float64 {
+		return sqrtFunc(i, g.StartY, endY)
+	}
+
+	zoom := g.Zoom
+	zFunc := func(i int) float64 {
+		x := float64(i) / float64(g.Frames)
+		mult := x * x * x
+		v := zoom - g.StartZoom
+		return g.StartZoom + mult*v
+	}
+
+	for i := 0; i <= g.Frames; i++ {
+		fmt.Printf("Frame: %d X: %f Y: %f Zoom: %f\n", i, xFunc(i), yFunc(i), zFunc(i))
+		g.SetX(xFunc(i))
+		g.SetY(yFunc(i))
+		g.SetZoom(zFunc(i))
+
+		g.Generate()
+
+		buf := &bytes.Buffer{}
+		err = g.WriteJPG(buf)
+		if err != nil {
+			return err
+		}
+
+		err = aw.AddFrame(buf.Bytes())
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 // WritePNG writes the underlying image to a an io.Writer

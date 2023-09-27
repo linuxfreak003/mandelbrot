@@ -11,7 +11,7 @@ import (
 	mandel "github.com/linuxfreak003/mandelbrot"
 )
 
-func MyColorFunc(iters int) color.RGBA {
+func MyColorFuncOld(iters int) color.RGBA {
 	black := color.RGBA{255, 255, 255, 0xff}
 	blue := color.RGBA{0, 100, 255, 0xff}
 	red := color.RGBA{255, 0, 0, 0xff}
@@ -27,6 +27,24 @@ func MyColorFunc(iters int) color.RGBA {
 	}
 
 	return mandel.Gradient(red, teal, 400, iters-600)
+}
+
+func MyColorFunc(iters int) color.RGBA {
+	black := color.RGBA{255, 255, 255, 0xff}
+	blue := color.RGBA{0, 100, 255, 0xff}
+	red := color.RGBA{255, 0, 0, 0xff}
+	teal := color.RGBA{255, 255, 0, 0xff}
+
+	switch {
+	case iters == -1:
+		return black
+	case iters < 150:
+		return mandel.Gradient(blue, black, 150, iters)
+	case iters < 300:
+		return mandel.Gradient(black, red, 150, iters-150)
+	}
+
+	return mandel.Gradient(red, teal, 400, iters-300)
 }
 
 func Christmas(x int) color.RGBA {
@@ -100,7 +118,7 @@ func main() {
 	var random, julia, help bool
 
 	flag.StringVar(&colorfunc, "colorfunc", "SimpleGrayscale", "`Color Function`")
-	flag.StringVar(&filename, "o", "test.png", "Output Filename")
+	flag.StringVar(&filename, "o", "test.avi", "Output Filename")
 	flag.Float64Var(&zoom, "zoom", 1.0, "Zoom")
 	flag.Float64Var(&x, "x", 0.0, "X")
 	flag.Float64Var(&y, "y", 0.0, "Y")
@@ -138,7 +156,18 @@ func main() {
 
 	log.Printf("Generating fractal...")
 	t := time.Now()
-	m.Generate()
+	// m.Generate()
+	// f, err := os.Create(filename)
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// defer f.Close()
+
+	err := m.WriteVideo(filename)
+	if err != nil {
+		panic(err)
+	}
+
 	log.Printf("Parameters\n"+
 		"Resolution %d x %d\n"+
 		"X: %f Y: %f\n"+
@@ -148,14 +177,4 @@ func main() {
 		m.Limit, m.AntiAlias, time.Now().Sub(t),
 	)
 
-	f, err := os.Create(filename)
-	if err != nil {
-		panic(err)
-	}
-	defer f.Close()
-
-	err = m.WritePNG(f)
-	if err != nil {
-		panic(err)
-	}
 }
